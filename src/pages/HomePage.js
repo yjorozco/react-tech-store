@@ -6,12 +6,13 @@ import Feachured from '../components/HomePage/Feachured';
 export default function HomePage() {
     return (
         <>
-            <Hero title="awesome gadgets" max={true}>
+            <Hero title="awesome gadgets" max={"true"}>
                 <Link to="/products" className='main-link' style={{margin:"2rem"}}>
                     our products
                 </Link>
             </Hero>
             <Services />
+            <Feachured />
         </>
     )
 }
