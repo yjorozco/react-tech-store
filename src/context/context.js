@@ -21,7 +21,7 @@ class ProductProvider extends Component {
         filteredProducts: [],
         featuredProducts: [],
         singleProduct: {},
-        loading: false
+        loading: true
     }
 
     componentDidMount(){
@@ -65,7 +65,9 @@ class ProductProvider extends Component {
     }
 
     getStorageProduct = () => {
-        return [];
+        return localStorage.getItem('singleProduct')? 
+        JSON.parse(localStorage.getItem('singleProduct'))
+        : {};
     }
 
     getTotals = () => {
@@ -125,7 +127,12 @@ class ProductProvider extends Component {
         })
     } 
     setSingleProduct = id =>{
-        console.log(`single product ${id}`);
+        let product = this.state.storeProducts.find(item => item.id === id);
+        localStorage.setItem('singleProduct', JSON.stringify(product));
+        this.setState({
+            singleProduct:{...product},
+            loading: false
+        })
     }
 
     handleSidebar = () => {
@@ -159,7 +166,8 @@ class ProductProvider extends Component {
             closeCart: this.closeCart,
             openCart: this.openCart,
             addToCart: this.addToCart,
-            singleProduct: this.singleProduct
+            singleProduct: this.singleProduct,
+            setSingleProduct: this.setSingleProduct
         }} >
             {this.props.children}
         </ProductContext.Provider>
