@@ -10,13 +10,14 @@ const ProductContext = React.createContext();
 class ProductProvider extends Component {
     state = {
         sidebarOpen: false,
-        cartOpen: false,
+        cartOpen: true,
         cartItems: 101,
         links: linkData,
         socialIcons: socialData,
         cart: [],
         cartSubtotal: 0,
         cartTax: 0,
+        cartTotal:0,
         storeProducts: [],
         filteredProducts: [],
         featuredProducts: [],
@@ -80,14 +81,14 @@ class ProductProvider extends Component {
         subTotal = parseFloat(subTotal.toFixed(2));
         let tax =  subTotal * 0.2;
         tax = parseFloat(tax.toFixed(2));
-        let total = subTotal * tax;
+        let total = subTotal + tax;
         total = parseFloat(total.toFixed(2));
-        return (
+        return {
             cartItems,
             subTotal,
             tax,
             total
-        )
+        }
     }
 
     syncStorage = () => {
@@ -121,9 +122,12 @@ class ProductProvider extends Component {
 
     addTotals = () =>{
         const totals = this.getTotals();
+        console.log(totals.total);
         this.setState({
             cartItems: totals.cartItems,
-            cartSubTotal: totals.subTotal
+            cartSubTotal: totals.subTotal,
+            cartTax: totals.tax,
+            cartTotal: totals.total
         })
     } 
     setSingleProduct = id =>{
@@ -142,7 +146,7 @@ class ProductProvider extends Component {
     }
     handleCart = () =>{
         this.setState({
-            cartOpen:!this.state.sidebarOpen
+            cartOpen:!this.state.cartOpen
         });
     }
     closeCart = () => {
@@ -166,7 +170,6 @@ class ProductProvider extends Component {
             closeCart: this.closeCart,
             openCart: this.openCart,
             addToCart: this.addToCart,
-            singleProduct: this.singleProduct,
             setSingleProduct: this.setSingleProduct
         }} >
             {this.props.children}
