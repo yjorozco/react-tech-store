@@ -10,7 +10,7 @@ const ProductContext = React.createContext();
 class ProductProvider extends Component {
     state = {
         sidebarOpen: false,
-        cartOpen: true,
+        cartOpen: false,
         cartItems: 101,
         links: linkData,
         socialIcons: socialData,
@@ -22,7 +22,13 @@ class ProductProvider extends Component {
         filteredProducts: [],
         featuredProducts: [],
         singleProduct: {},
-        loading: true
+        loading: true,
+        search:'',
+        price:0,
+        min:0,
+        max:0,
+        company:'all',
+        shipping: true
     }
 
     componentDidMount(){
@@ -40,14 +46,17 @@ class ProductProvider extends Component {
         let featuredProducts = storeProducts.filter(item => 
             item.featured === true
         )
-
+        let maxPrice = Math.max(...storeProducts.map(item => item.price));
+        console.log(maxPrice);
         this.setState({
             storeProducts,
             filteredProducts: storeProducts,
             featuredProducts,
             cart: this.getStorageCart(),
             singleProduct: this.getStorageProduct(),
-            loading: false
+            loading: false,
+            price: maxPrice,
+            max: maxPrice
         }, () => {
                 this.addTotals();
         })
@@ -122,7 +131,6 @@ class ProductProvider extends Component {
 
     addTotals = () =>{
         const totals = this.getTotals();
-        console.log(totals.total);
         this.setState({
             cartItems: totals.cartItems,
             cartSubTotal: totals.subTotal,
@@ -154,10 +162,105 @@ class ProductProvider extends Component {
             cartOpen: false
         })
     }
+    increment = (id) => {
+        let tempCart = [...this.state.cart];
+        const cartItem = tempCart.find(item => item.id === id);
+        cartItem.count++;
+        cartItem.total = cartItem.count * cartItem.price;
+        cartItem.total = parseFloat(cartItem.total.toFixed(2));
+        this.setState(()=>{
+            return {
+                cart: [...tempCart]
+            }
+        }, ()=>{
+            this.addTotals();
+            this.syncStorage()
+        })
+    }
+    decrement = (id) =>{
+        let tempCart = [...this.state.cart];
+        const cartItem = tempCart.find(item => item.id === id);
+        cartItem.count = cartItem.count - 1;
+        if(cartItem.count === 0){
+            this.removeItem(id);
+        }   
+        else
+        {
+            cartItem.total = cartItem.count * cartItem.price;
+            cartItem.total = parseFloat(cartItem.total.toFixed(2));
+            this.setState(()=>{
+                return {
+                    cart: [...tempCart]
+                }
+            }, ()=>{
+                this.addTotals();
+                this.syncStorage()
+            })                
+        }    
+    }
+
+    removeItem = (id) => {
+        let tempCart = [...this.state.cart];
+        tempCart = tempCart.filter(item => item.id !== id);
+        this.setState({
+            cart:[...tempCart]
+        }, ()=>{
+            this.addTotals();
+            this.syncStorage()
+        })
+    }
+
+    clearCart = () => {
+        this.setState({
+            cart:[]
+        }, ()=>{
+            this.addTotals();
+            this.syncStorage()
+        })
+    }
+    
     openCart = () => {
         this.setState({
             cartOpen: true
         });
+    }
+
+    handleChange = (event) =>{
+        const name=event.target.name;
+        const value = event.target.type === "checked"? event.target.checked: event.target.value;
+        this.setState({
+            [name]: value
+        }, 
+        this.sortData);       
+    }
+
+    sortData = () => {
+        const { storeProducts, price, company, shipping, search} = this.state;
+        let tempProducts = [...storeProducts];
+        let tempPrice =  parseInt(price);
+        tempProducts = tempProducts.filter(
+            item => item.price <= tempPrice
+        );
+        if(company!="all"){
+            tempProducts = tempProducts.filter(item => item.company === company);
+        }
+        if(shipping){
+            tempProducts = tempProducts.filter(item => item.freeShipping === true);
+        }
+        console.log(tempProducts);
+        if(search.length>0){
+            tempProducts = tempProducts.filter(item => {
+                let tempSearch = search.toLowerCase();
+                let tempTitle = item.title.toLowerCase().slice(0, search.length);
+                if(tempSearch === tempTitle){
+                    return item;
+                }
+            })
+        }
+
+        this.setState({
+            filteredProducts: tempProducts
+        })
     }
 
     render(){
@@ -170,7 +273,12 @@ class ProductProvider extends Component {
             closeCart: this.closeCart,
             openCart: this.openCart,
             addToCart: this.addToCart,
-            setSingleProduct: this.setSingleProduct
+            setSingleProduct: this.setSingleProduct,
+            increment: this.increment,
+            decrement: this.decrement,
+            clearCart: this.clearCart,
+            removeItem: this.removeItem,
+            handleChange: this.handleChange
         }} >
             {this.props.children}
         </ProductContext.Provider>

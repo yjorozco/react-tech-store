@@ -2,7 +2,7 @@ import React from 'react'
 import  {ProductConsumer} from '../../context';
 import Title from '../Title';
 import Product from '../Product';
-
+import ProductFilter from './ProductFilter';
 export default function Products() {
     return (
         <ProductConsumer>
@@ -14,13 +14,27 @@ export default function Products() {
                          <section className="py-5">
                              <div className="container">
                                  <Title center title='our products' />
+                                 <ProductFilter />
+                                 <div className="row">
+                                     <div className="col-10 max-auto">
+                                         <div className="text-title">
+                                             total products : {filteredProducts.length}
+                                         </div>
+                                     </div>
+                                 </div>
                                     <div className="row py-5">
                                         {
+                                            filteredProducts.length === 0 ? (
+                                                <div className="col taxt-title text-center">
+                                                    sorry, no items matched your search
+                                                </div>
+                                            ):(
                                             filteredProducts.map(
                                                 product =>{    
                                                                              
                                                     return <Product key={product.id} product={product} />
                                                 }
+                                            )
                                             )
                                         }
                                     </div>

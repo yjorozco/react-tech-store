@@ -8,7 +8,7 @@ export default function SideBar() {
         <ProductConsumer>
             {value =>{
                 const { links, sidebarOpen, handleSidebar } = value;
-                console.log(sidebarOpen);
+
                 return (
                     <SideWrapper show={sidebarOpen}>
                         <ul>
