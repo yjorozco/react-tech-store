@@ -28,7 +28,7 @@ class ProductProvider extends Component {
         min:0,
         max:0,
         company:'all',
-        shipping: true
+        shipping: false
     }
 
     componentDidMount(){
@@ -47,7 +47,6 @@ class ProductProvider extends Component {
             item.featured === true
         )
         let maxPrice = Math.max(...storeProducts.map(item => item.price));
-        console.log(maxPrice);
         this.setState({
             storeProducts,
             filteredProducts: storeProducts,
@@ -227,26 +226,34 @@ class ProductProvider extends Component {
 
     handleChange = (event) =>{
         const name=event.target.name;
-        const value = event.target.type === "checked"? event.target.checked: event.target.value;
+        const value = event.target.type === "checkbox"? event.target.checked: event.target.value;
         this.setState({
             [name]: value
-        }, 
-        this.sortData);       
+        }, () => {
+        this.sortData()});       
     }
 
     sortData = () => {
-        const { storeProducts, price, company, shipping, search} = this.state;
+
+        const {shipping} = this.state;
+        if(!shipping)
+            this.setProducts(items);   
+        
+        const { storeProducts, price, company, search} = this.state;
+
         let tempProducts = [...storeProducts];
         let tempPrice =  parseInt(price);
+
+        if(shipping)
+            tempProducts = tempProducts.filter(item => item.freeShipping === true);
+
         tempProducts = tempProducts.filter(
             item => item.price <= tempPrice
         );
         if(company!="all"){
             tempProducts = tempProducts.filter(item => item.company === company);
         }
-        if(shipping){
-            tempProducts = tempProducts.filter(item => item.freeShipping === true);
-        }
+
         console.log(tempProducts);
         if(search.length>0){
             tempProducts = tempProducts.filter(item => {
