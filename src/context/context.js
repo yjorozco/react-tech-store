@@ -227,6 +227,7 @@ class ProductProvider extends Component {
     handleChange = (event) =>{
         const name=event.target.name;
         const value = event.target.type === "checkbox"? event.target.checked: event.target.value;
+        console.log(event.target.name);
         this.setState({
             [name]: value
         }, () => {
@@ -234,18 +235,16 @@ class ProductProvider extends Component {
     }
 
     sortData = () => {
-
-        const {shipping} = this.state;
-        if(!shipping)
-            this.setProducts(items);   
+       
         
-        const { storeProducts, price, company, search} = this.state;
+        const { shipping, storeProducts, price, company, search} = this.state;
 
         let tempProducts = [...storeProducts];
         let tempPrice =  parseInt(price);
 
         if(shipping)
             tempProducts = tempProducts.filter(item => item.freeShipping === true);
+        
 
         tempProducts = tempProducts.filter(
             item => item.price <= tempPrice
